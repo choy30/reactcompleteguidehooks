@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
 
 import Card from "../UI/Card";
+import useHttp from "../../hooks/http";
+import ErrorModal from "../UI/ErrorModal";
 import "./Search.css";
 
 const Search = React.memo((props) => {
 	const { onLoadingIngredients } = props;
 	const [enteredFilter, setEnterFilter] = useState("");
 	const inputRef = useRef();
+	const { isLoading, data, error, sendRequest, clear } = useHttp();
 
 	useEffect(() => {
 		const timer = setTimeout(() => {
@@ -15,34 +18,39 @@ const Search = React.memo((props) => {
 					enteredFilter.length === 0
 						? ""
 						: `?orderBy="title"&equalTo="${enteredFilter}"`;
-				fetch(
+				sendRequest(
 					"https://react-http-a1d35-default-rtdb.firebaseio.com//ingredients.json" +
-						query
-				)
-					.then((response) => response.json())
-					.then((responseData) => {
-						const loadedIngredients = [];
-						for (const key in responseData) {
-							loadedIngredients.push({
-								id: key,
-								title: responseData[key].title,
-								amount: responseData[key].amount,
-							});
-						}
-						onLoadingIngredients(loadedIngredients);
-					});
+						query,
+					"GET"
+				);
 			}
 		}, 500);
-    return () => {
-      clearTimeout(timer);
-    };
-	}, [enteredFilter, onLoadingIngredients, inputRef]);
+		return () => {
+			clearTimeout(timer);
+		};
+	}, [enteredFilter, inputRef, sendRequest]);
+
+	useEffect(() => {
+		if (!isLoading && !error && data) {
+			const loadedIngredients = [];
+			for (const key in data) {
+				loadedIngredients.push({
+					id: key,
+					title: data[key].title,
+					amount: data[key].amount,
+				});
+			}
+			onLoadingIngredients(loadedIngredients);
+		}
+	}, [data, isLoading, error, onLoadingIngredients]);
 
 	return (
 		<section className="search">
+			{error && <ErrorModal onClose={clear}>{error}</ErrorModal>}
 			<Card>
 				<div className="search-input">
 					<label>Filter by Title</label>
+          {isLoading && <span>Loading...</span>}
 					<input
 						ref={inputRef}
 						type="text"

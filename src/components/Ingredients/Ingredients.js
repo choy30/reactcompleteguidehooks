@@ -21,8 +21,15 @@ const ingredientReducer = (currentIngredients, action) => {
 
 const Ingredients = () => {
 	const [userIngredients, dispatch] = useReducer(ingredientReducer, []);
-	const { isLoading, error, data, sendRequest, reqExtra, reqIdentifier } =
-		useHttp();
+	const {
+		isLoading,
+		error,
+		data,
+		sendRequest,
+		reqExtra,
+		reqIdentifier,
+		clear,
+	} = useHttp();
 
 	// const [userIngredients, setUserIngredients] = useState([]);
 	// const [isLoading, setIsLoading] = useState(false);
@@ -44,38 +51,41 @@ const Ingredients = () => {
 		dispatch({ type: "SET", ingredients: filteredIngredients });
 	}, []);
 
-	const addIngredientHandler = useCallback((ingredient) => {
-		sendRequest(
-			"https://react-http-a1d35-default-rtdb.firebaseio.com//ingredients.json",
-			"POST",
-			JSON.stringify(ingredient),
-			ingredient,
-			"ADD_INGREDIENT"
-		);
-		// dispatchHttp({ type: "SEND" });
-		// fetch(
-		// 	"https://react-http-a1d35-default-rtdb.firebaseio.com//ingredients.json",
-		// 	{
-		// 		method: "POST",
-		// 		body: JSON.stringify(ingredient),
-		// 		headers: { "Content-Type": "application/json" },
-		// 	}
-		// )
-		// 	.then((response) => {
-		// 		dispatchHttp({ type: "RESPONSE" });
-		// 		return response.json();
-		// 	})
-		// 	.then((responseData) => {
-		// 		// setUserIngredients((prevIngredients) => [
-		// 		// 	...prevIngredients,
-		// 		// 	{ id: responseData.name, ...ingredient },
-		// 		// ]);
-		// 		dispatch({
-		// 			type: "ADD",
-		// 			ingredient: { id: responseData.name, ...ingredient },
-		// 		});
-		// 	});
-	}, []);
+	const addIngredientHandler = useCallback(
+		(ingredient) => {
+			sendRequest(
+				"https://react-http-a1d35-default-rtdb.firebaseio.com//ingredients.json",
+				"POST",
+				JSON.stringify(ingredient),
+				ingredient,
+				"ADD_INGREDIENT"
+			);
+			// dispatchHttp({ type: "SEND" });
+			// fetch(
+			// 	"https://react-http-a1d35-default-rtdb.firebaseio.com//ingredients.json",
+			// 	{
+			// 		method: "POST",
+			// 		body: JSON.stringify(ingredient),
+			// 		headers: { "Content-Type": "application/json" },
+			// 	}
+			// )
+			// 	.then((response) => {
+			// 		dispatchHttp({ type: "RESPONSE" });
+			// 		return response.json();
+			// 	})
+			// 	.then((responseData) => {
+			// 		// setUserIngredients((prevIngredients) => [
+			// 		// 	...prevIngredients,
+			// 		// 	{ id: responseData.name, ...ingredient },
+			// 		// ]);
+			// 		dispatch({
+			// 			type: "ADD",
+			// 			ingredient: { id: responseData.name, ...ingredient },
+			// 		});
+			// 	});
+		},
+		[sendRequest]
+	);
 
 	const removeIngredientHandler = useCallback(
 		(ingredientId) => {
@@ -92,7 +102,8 @@ const Ingredients = () => {
 
 	const clearError = useCallback(() => {
 		// dispatchHttp({ type: "CLEAR" });
-	}, []);
+		clear();
+	}, [clear]);
 
 	const ingredientList = useMemo(() => {
 		return (
